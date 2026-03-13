@@ -1,0 +1,54 @@
+[
+  { "employee_id": "EMP001", "date": "2026-03-01", "login_time": "2026-03-01T09:00:00Z", "logout_time": "2026-03-01T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP001", "date": "2026-03-02", "login_time": "2026-03-02T09:02:00Z", "logout_time": "2026-03-02T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP001", "date": "2026-03-03", "login_time": "2026-03-03T08:58:00Z", "logout_time": "2026-03-03T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP001", "date": "2026-03-04", "login_time": "2026-03-04T09:05:00Z", "logout_time": "2026-03-04T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP001", "date": "2026-03-05", "login_time": "2026-03-05T09:00:00Z", "logout_time": "2026-03-05T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP001", "date": "2026-03-06", "login_time": "2026-03-06T09:10:00Z", "logout_time": "2026-03-06T17:30:00Z", "status": "late" },
+  { "employee_id": "EMP001", "date": "2026-03-07", "login_time": null, "logout_time": null, "status": "absent" },
+  { "employee_id": "EMP001", "date": "2026-03-08", "login_time": "2026-03-08T09:00:00Z", "logout_time": "2026-03-08T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP001", "date": "2026-03-09", "login_time": "2026-03-09T09:02:00Z", "logout_time": null, "status": "present" },
+
+  { "employee_id": "EMP002", "date": "2026-03-01", "login_time": "2026-03-01T09:05:00Z", "logout_time": "2026-03-01T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP002", "date": "2026-03-02", "login_time": "2026-03-02T09:00:00Z", "logout_time": "2026-03-02T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP002", "date": "2026-03-03", "login_time": "2026-03-03T08:55:00Z", "logout_time": "2026-03-03T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP002", "date": "2026-03-04", "login_time": "2026-03-04T09:02:00Z", "logout_time": "2026-03-04T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP002", "date": "2026-03-05", "login_time": "2026-03-05T09:00:00Z", "logout_time": "2026-03-05T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP002", "date": "2026-03-06", "login_time": "2026-03-06T09:15:00Z", "logout_time": "2026-03-06T17:30:00Z", "status": "late" },
+  { "employee_id": "EMP002", "date": "2026-03-07", "login_time": "2026-03-07T09:00:00Z", "logout_time": "2026-03-07T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP002", "date": "2026-03-08", "login_time": "2026-03-08T09:02:00Z", "logout_time": "2026-03-08T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP002", "date": "2026-03-09", "login_time": "2026-03-09T09:05:00Z", "logout_time": null, "status": "present" },
+
+
+  { "employee_id": "EMP003", "date": "2026-03-01", "login_time": "2026-03-01T09:30:00Z", "logout_time": "2026-03-01T17:30:00Z", "status": "late" },
+  { "employee_id": "EMP003", "date": "2026-03-02", "login_time": null, "logout_time": null, "status": "absent" },
+  { "employee_id": "EMP003", "date": "2026-03-03", "login_time": "2026-03-03T09:15:00Z", "logout_time": "2026-03-03T17:30:00Z", "status": "late" },
+  { "employee_id": "EMP003", "date": "2026-03-04", "login_time": "2026-03-04T09:00:00Z", "logout_time": "2026-03-04T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP003", "date": "2026-03-05", "login_time": null, "logout_time": null, "status": "absent" },
+  { "employee_id": "EMP003", "date": "2026-03-06", "login_time": "2026-03-06T09:45:00Z", "logout_time": "2026-03-06T17:30:00Z", "status": "late" },
+  { "employee_id": "EMP003", "date": "2026-03-07", "login_time": null, "logout_time": null, "status": "absent" },
+  { "employee_id": "EMP003", "date": "2026-03-08", "login_time": "2026-03-08T09:20:00Z", "logout_time": "2026-03-08T17:30:00Z", "status": "late" },
+  { "employee_id": "EMP003", "date": "2026-03-09", "login_time": null, "logout_time": null, "status": "absent" },
+
+
+  { "employee_id": "EMP004", "date": "2026-03-01", "login_time": "2026-03-01T09:00:00Z", "logout_time": "2026-03-01T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP004", "date": "2026-03-02", "login_time": "2026-03-02T09:02:00Z", "logout_time": "2026-03-02T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP004", "date": "2026-03-03", "login_time": "2026-03-03T09:30:00Z", "logout_time": "2026-03-03T17:30:00Z", "status": "late" },
+  { "employee_id": "EMP004", "date": "2026-03-04", "login_time": "2026-03-04T09:00:00Z", "logout_time": "2026-03-04T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP004", "date": "2026-03-05", "login_time": null, "logout_time": null, "status": "absent" },
+  { "employee_id": "EMP004", "date": "2026-03-06", "login_time": "2026-03-06T09:05:00Z", "logout_time": "2026-03-06T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP004", "date": "2026-03-07", "login_time": "2026-03-07T09:00:00Z", "logout_time": "2026-03-07T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP004", "date": "2026-03-08", "login_time": "2026-03-08T09:10:00Z", "logout_time": "2026-03-08T17:30:00Z", "status": "late" },
+  { "employee_id": "EMP004", "date": "2026-03-09", "login_time": "2026-03-09T09:02:00Z", "logout_time": null, "status": "present" },
+
+
+  { "employee_id": "EMP005", "date": "2026-03-01", "login_time": "2026-03-01T09:00:00Z", "logout_time": "2026-03-01T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP005", "date": "2026-03-02", "login_time": "2026-03-02T09:02:00Z", "logout_time": "2026-03-02T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP005", "date": "2026-03-03", "login_time": "2026-03-03T08:58:00Z", "logout_time": "2026-03-03T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP005", "date": "2026-03-04", "login_time": "2026-03-04T09:05:00Z", "logout_time": "2026-03-04T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP005", "date": "2026-03-05", "login_time": "2026-03-05T09:00:00Z", "logout_time": "2026-03-05T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP005", "date": "2026-03-06", "login_time": "2026-03-06T09:15:00Z", "logout_time": "2026-03-06T17:30:00Z", "status": "late" },
+  { "employee_id": "EMP005", "date": "2026-03-07", "login_time": "2026-03-07T09:00:00Z", "logout_time": "2026-03-07T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP005", "date": "2026-03-08", "login_time": "2026-03-08T09:00:00Z", "logout_time": "2026-03-08T17:30:00Z", "status": "present" },
+  { "employee_id": "EMP005", "date": "2026-03-09", "login_time": "2026-03-09T09:05:00Z", "logout_time": null, "status": "present" }
+]

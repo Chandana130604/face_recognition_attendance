@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Attendance · FaceTrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            width: 450px;
+            max-width: 100%;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .info {
+            background: #f0f4f8;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        .info p {
+            margin: 0.5rem 0;
+            color: #2d3748;
+            font-size: 1rem;
+        }
+        .info span {
+            font-weight: 600;
+            color: #1e4a6f;
+        }
+        .time-box {
+            background: #eef6ff;
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .time-box .label {
+            font-size: 0.9rem;
+            color: #4a5a6e;
+        }
+        .time-box .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e4a6f;
+        }
+        .status-badge {
+            background: #e1f7e3;
+            color: #1e7e34;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            display: inline-block;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.3s;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5a67d8;
+        }
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #333;
+        }
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+        .message {
+            text-align: center;
+            margin: 1rem 0;
+            font-weight: 500;
+        }
+        .back {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+        .back a {
+            color: #888;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="card" id="attendanceCard">
+        <h2><i class="fas fa-clock"></i> My Attendance</h2>
+        <div class="info">
+            <p><span>Name:</span> <span id="empName">-</span></p>
+            <p><span>Employee ID:</span> <span id="empId">-</span></p>
+            <p><span>Department:</span> <span id="empDept">-</span></p>
+        </div>
+        <div class="time-box">
+            <div class="label">Current Time</div>
+            <div class="value" id="currentTime"></div>
+        </div>
+        <div id="statusSection" style="text-align: center;">
+            <div class="status-badge" id="attStatus">Not marked</div>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-primary" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Login</button>
+            <button class="btn btn-secondary" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+        <div id="messageBox" class="message"></div>
+        <div class="back">
+            <a href="/user-face-login"><i class="fas fa-arrow-left"></i> Switch User</a>
+        </div>
+    </div>
+
+    <script>
+        // Load employee info from sessionStorage (set after face recognition)
+        const empId = sessionStorage.getItem('userEmpId');
+        const empName = sessionStorage.getItem('userName');
+        // Optionally, you could fetch department from the server later
+
+        if (!empId) {
+            // If no employee info, redirect to face login
+            window.location.href = '/user-face-login';
+        }
+
+        document.getElementById('empName').innerText = empName || 'Unknown';
+        document.getElementById('empId').innerText = empId || 'Unknown';
+        // For department, you might want to fetch from backend; placeholder for now
+        document.getElementById('empDept').innerText = 'Engineering'; // You can replace with actual data
+
+        // Update current time every second
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').innerText = now.toLocaleTimeString();
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Check today's attendance status
+        fetch(`/api/attendance/employee/${empId}?days=1`)
+            .then(res => res.json())
+            .then(records => {
+                if (records.length > 0 && records[0].login_time) {
+                    const rec = records[0];
+                    document.getElementById('attStatus').innerText = `Logged in at ${rec.login_time}`;
+                    if (rec.logout_time) {
+                        document.getElementById('attStatus').innerText += `, out at ${rec.logout_time}`;
+                    }
+                }
+            })
+            .catch(err => console.error('Error fetching status:', err));
+
+        function markLogin() {
+            fetch('/api/attendance/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ emp_id: empId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('messageBox').innerHTML = '<span style="color:#1e7e34;">✔ ' + data.message + '</span>';
+                    document.getElementById('attStatus').innerText = 'Logged in';
+                } else {
+                    document.getElementById('messageBox').innerHTML = '<span style="color:#b33;">✘ ' + data.message + '</span>';
+                }
+            })
+            .catch(err => {
+                document.getElementById('messageBox').innerHTML = '<span style="color:#b33;">✘ Error: ' + err.message + '</span>';
+            });
+        }
+
+        function markLogout() {
+            fetch('/api/attendance/logout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ emp_id: empId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('messageBox').innerHTML = '<span style="color:#1e7e34;">✔ ' + data.message + '</span>';
+                    document.getElementById('attStatus').innerText = 'Logged out';
+                } else {
+                    document.getElementById('messageBox').innerHTML = '<span style="color:#b33;">✘ ' + data.message + '</span>';
+                }
+            })
+            .catch(err => {
+                document.getElementById('messageBox').innerHTML = '<span style="color:#b33;">✘ Error: ' + err.message + '</span>';
+            });
+        }
+
+        document.getElementById('loginBtn').addEventListener('click', markLogin);
+        document.getElementById('logoutBtn').addEventListener('click', markLogout);
+    </script>
+</body>
+</html>

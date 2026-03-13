@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Employee</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        #video { width: 100%; max-width: 600px; border-radius: 10px; }
+        #canvas { display: none; }
+        .camera-container { text-align: center; margin: 20px 0; }
+        .progress { height: 25px; margin-top: 10px; display: none; }
+        .preview-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        .preview-item { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; border: 2px solid #ccc; }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h2>Register New Employee</h2>
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        <form id="registerForm" method="POST">
+            <div class="mb-3">
+                <label for="emp_id" class="form-label">Employee ID</label>
+                <input type="text" class="form-control" id="emp_id" name="emp_id" required>
+            </div>
+            <div class="mb-3">
+                <label for="name" class="form-label">Full Name</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            <div class="mb-3">
+                <label for="department" class="form-label">Department</label>
+                <input type="text" class="form-control" id="department" name="department" required>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+            <div class="mb-3">
+                <label for="role" class="form-label">Role</label>
+                <select class="form-control" id="role" name="role" required>
+                    <option value="employee">Employee</option>
+                    <option value="manager">Manager</option>
+                    <option value="hr">HR</option>
+                    <option value="supervisor">Supervisor</option>
+                </select>
+            </div>
+
+            <div class="camera-container">
+                <h5>Capture 5 Face Images</h5>
+                <video id="video" autoplay playsinline></video>
+                <div class="mt-3">
+                    <button type="button" id="startCaptureBtn" class="btn btn-success">📸 Start Capture</button>
+                    <button type="button" id="retakeBtn" class="btn btn-secondary" style="display:none;">🔄 Retake</button>
+                </div>
+                <canvas id="canvas"></canvas>
+                <div class="progress" id="captureProgress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressBar" style="width:0%">0/5</div>
+                </div>
+                <div id="sizeInfo" class="text-muted mt-1" style="font-size:0.85em;"></div>
+                <div id="previewGrid" class="preview-grid"></div>
+                <input type="hidden" id="imageData" name="images">
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn btn-primary mt-3" disabled>✅ Register Employee</button>
+        </form>
+        <div class="mt-3">
+            <a href="/admin-dashboard">⬅ Back to Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        const TOTAL_FRAMES = 5;
+
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const startCaptureBtn = document.getElementById('startCaptureBtn');
+        const retakeBtn = document.getElementById('retakeBtn');
+        const imageDataInput = document.getElementById('imageData');
+        const submitBtn = document.getElementById('submitBtn');
+        const previewGrid = document.getElementById('previewGrid');
+        const captureProgress = document.getElementById('captureProgress');
+        const progressBar = document.getElementById('progressBar');
+        const sizeInfo = document.getElementById('sizeInfo');
+        let stream = null;
+        let capturedImages = [];
+
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
+                });
+                video.srcObject = stream;
+            } catch (err) {
+                alert('Camera error: ' + err.message);
+            }
+        }
+        startCamera();
+
+        startCaptureBtn.addEventListener('click', () => {
+            if (!video.videoWidth) {
+                alert('Camera not ready. Please wait a moment.');
+                return;
+            }
+            startCaptureBtn.disabled = true;
+            retakeBtn.style.display = 'inline-block';
+            capturedImages = [];
+            previewGrid.innerHTML = '';
+            sizeInfo.innerText = '';
+            captureProgress.style.display = 'block';
+            progressBar.style.width = '0%';
+            progressBar.innerText = '0/' + TOTAL_FRAMES;
+            captureFrames(TOTAL_FRAMES);
+        });
+
+        function captureFrames(remaining) {
+            if (remaining <= 0) {
+                captureProgress.style.display = 'none';
+
+                const jsonStr = JSON.stringify(capturedImages);
+                const sizeMB = (jsonStr.length / 1024 / 1024).toFixed(2);
+                console.log('Payload size (MB):', sizeMB);
+                sizeInfo.innerText = 'Payload size: ' + sizeMB + ' MB';
+
+                imageDataInput.value = jsonStr;
+                submitBtn.disabled = false;
+                return;
+            }
+
+            setTimeout(() => {
+                canvas.width = 480;
+                canvas.height = 360;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const dataURL = canvas.toDataURL('image/jpeg', 0.6);
+                capturedImages.push(dataURL);
+
+                const img = document.createElement('img');
+                img.src = dataURL;
+                img.className = 'preview-item';
+                previewGrid.appendChild(img);
+
+                const done = TOTAL_FRAMES - remaining + 1;
+                const percent = (done / TOTAL_FRAMES) * 100;
+                progressBar.style.width = percent + '%';
+                progressBar.innerText = done + '/' + TOTAL_FRAMES;
+
+                captureFrames(remaining - 1);
+            }, 300);
+        }
+
+        retakeBtn.addEventListener('click', () => {
+            capturedImages = [];
+            previewGrid.innerHTML = '';
+            imageDataInput.value = '';
+            sizeInfo.innerText = '';
+            submitBtn.disabled = true;
+            startCaptureBtn.disabled = false;
+            retakeBtn.style.display = 'none';
+            captureProgress.style.display = 'none';
+        });
+
+        window.addEventListener('beforeunload', () => {
+            if (stream) stream.getTracks().forEach(t => t.stop());
+        });
+    </script>
+</body>
+</html>

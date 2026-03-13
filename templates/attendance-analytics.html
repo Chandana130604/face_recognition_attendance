@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Analytics · FaceTrack HR</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        body {
+            background-color: #f5f7fb;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .app {
+            display: flex;
+            height: 100%;
+        }
+        /* ---------- SIDEBAR ---------- */
+        .sidebar {
+            width: 260px;
+            background: white;
+            border-right: 1px solid #e9eef2;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.02);
+        }
+        .sidebar-header {
+            padding: 24px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #f0f3f7;
+        }
+        .sidebar-header .logo {
+            background: #1e4a6f;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+        .sidebar-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a2639;
+        }
+        .nav {
+            flex: 1;
+            padding: 24px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            color: #4a5a6e;
+            font-weight: 500;
+            font-size: 15px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .nav-item i {
+            width: 22px;
+            font-size: 1.2rem;
+            color: #6b7a8f;
+        }
+        .nav-item.active {
+            background: #eef6ff;
+            color: #1e4a6f;
+        }
+        .nav-item.active i {
+            color: #1e4a6f;
+        }
+        .nav-item:hover:not(.active) {
+            background: #f8fafd;
+        }
+        /* ---------- MAIN CONTENT ---------- */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: #f5f7fb;
+        }
+        .top-header {
+            background: white;
+            padding: 16px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e9eef2;
+        }
+        .header-left h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1a2639;
+        }
+        .header-left .datetime {
+            font-size: 0.9rem;
+            color: #6b7a8f;
+            margin-top: 4px;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .notification-icon {
+            font-size: 1.3rem;
+            color: #4a5a6e;
+            cursor: pointer;
+        }
+        .admin-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: #1e4a6f;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        .logout-btn {
+            background: none;
+            border: 1px solid #dde3e9;
+            padding: 8px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .logout-btn:hover {
+            background: #f0f4f8;
+        }
+        /* ---------- CONTENT AREA ---------- */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+        }
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #1a2639;
+        }
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .analytics-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            border: 1px solid #edf2f7;
+            border-left: 5px solid #1e4a6f;
+            display: flex;
+            flex-direction: column;
+        }
+        .analytics-card .card-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7a8f;
+            margin-bottom: 10px;
+        }
+        .analytics-card .value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a2639;
+        }
+        .analytics-card .sub {
+            font-size: 16px;
+            color: #1e4a6f;
+            margin-top: 5px;
+        }
+        .card-highest {
+            border-left-color: #1e7e34;
+        }
+        .card-lowest {
+            border-left-color: #b33;
+        }
+        .card-average {
+            border-left-color: #ffc107;
+        }
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .chart-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #edf2f7;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+        .chart-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a2639;
+            margin-bottom: 20px;
+        }
+        .chart-card canvas {
+            max-height: 250px;
+        }
+        .tables-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .table-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #edf2f7;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+        .table-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a2639;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            text-align: left;
+            padding: 12px 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #4a5a6e;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #f0f4f8;
+            color: #1a2639;
+            font-size: 14px;
+        }
+        tbody tr:hover {
+            background: #f8fafd;
+        }
+        .badge-warning {
+            background: #f8d7da;
+            color: #b33;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        .rank-badge {
+            background: #1e4a6f;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        @media (max-width: 1024px) {
+            .cards-grid, .charts-row, .tables-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo"><i class="fas fa-camera-retro"></i></div>
+            <h2>FaceTrack HR</h2>
+        </div>
+        <div class="nav">
+            <div class="nav-item" data-page="dashboard"><i class="fas fa-chart-pie"></i> <span>Dashboard</span></div>
+            <div class="nav-item" data-page="camera"><i class="fas fa-video"></i> <span>Camera Monitor</span></div>
+            <div class="nav-item" data-page="employees"><i class="fas fa-users"></i> <span>Employees</span></div>
+            <div class="nav-item" data-page="logs"><i class="fas fa-clock"></i> <span>Attendance Logs</span></div>
+            <div class="nav-item active" data-page="analytics"><i class="fas fa-chart-line"></i> <span>Analytics</span></div>
+            <div class="nav-item" data-page="reports"><i class="fas fa-file-alt"></i> <span>Reports</span></div>
+            <div class="nav-item" data-page="settings"><i class="fas fa-cog"></i> <span>Settings</span></div>
+            <div class="nav-item" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></div>
+        </div>
+    </div>
+
+    <div class="main">
+        <!-- TOP HEADER -->
+        <div class="top-header">
+            <div class="header-left">
+                <h1>Attendance Analytics</h1>
+                <div class="datetime" id="currentDateTime"></div>
+            </div>
+            <div class="header-right">
+                <div class="notification-icon"><i class="far fa-bell"></i></div>
+                <div class="admin-profile">
+                    <div class="avatar">AD</div>
+                    <span>Admin</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <button class="logout-btn" id="headerLogoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <h2>Attendance Analytics</h2>
+
+            <div class="cards-grid">
+                <div class="analytics-card card-highest">
+                    <div class="card-title">Highest Attendance</div>
+                    <div class="value" id="highestValue">-</div>
+                    <div class="sub" id="highestSub">-</div>
+                </div>
+                <div class="analytics-card card-lowest">
+                    <div class="card-title">Lowest Attendance</div>
+                    <div class="value" id="lowestValue">-</div>
+                    <div class="sub" id="lowestSub">-</div>
+                </div>
+                <div class="analytics-card card-average">
+                    <div class="card-title">Average Attendance</div>
+                    <div class="value" id="averageValue">-</div>
+                    <div class="sub">company‑wide</div>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="chart-card">
+                    <h3>Monthly Attendance Trend</h3>
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Department Attendance Comparison</h3>
+                    <canvas id="deptChart"></canvas>
+                </div>
+            </div>
+
+            <div class="tables-grid">
+                <div class="table-card">
+                    <h3>Top Performers</h3>
+                    <table id="topTable">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Employee</th>
+                                <th>Department</th>
+                                <th>Attendance %</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="table-card">
+                    <h3>Low Attendance Alerts</h3>
+                    <table id="lowTable">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Department</th>
+                                <th>Attendance %</th>
+                                <th>Warning</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateDateTime() {
+        const now = new Date();
+        document.getElementById('currentDateTime').innerText = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+    }
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+
+    function logout() {
+        window.location.href = '/';
+    }
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+    document.getElementById('headerLogoutBtn').addEventListener('click', logout);
+
+    document.querySelectorAll('.nav-item[data-page]').forEach(item => {
+        item.addEventListener('click', function(e) {
+            const page = this.dataset.page;
+            const pageMap = {
+                'dashboard': '/admin-dashboard',
+                'camera': '/camera-monitor',
+                'employees': '/employees',
+                'logs': '/attendance-logs',
+                'analytics': '/attendance-analytics',
+                'reports': '/reports',
+                'settings': '/settings'
+            };
+            if (pageMap[page]) window.location.href = pageMap[page];
+        });
+    });
+
+    async function loadAnalytics() {
+        try {
+            const summaryRes = await fetch('/api/analytics/summary');
+            const summary = await summaryRes.json();
+            document.getElementById('highestValue').innerText = (summary.highest_percentage || 0) + '%';
+            document.getElementById('highestSub').innerText = summary.highest_employee || '-';
+            document.getElementById('lowestValue').innerText = (summary.lowest_percentage || 0) + '%';
+            document.getElementById('lowestSub').innerText = summary.lowest_employee || '-';
+            document.getElementById('averageValue').innerText = (summary.average_attendance || 0) + '%';
+
+            const monthlyRes = await fetch('/api/analytics/monthly-trend');
+            const monthly = await monthlyRes.json();
+            new Chart(document.getElementById('monthlyChart'), {
+                type: 'line',
+                data: {
+                    labels: monthly.months || ['Jan','Feb','Mar','Apr','May','Jun'],
+                    datasets: [{
+                        label: 'Attendance %',
+                        data: monthly.attendance || [0,0,0,0,0,0],
+                        borderColor: '#1e4a6f',
+                        backgroundColor: 'rgba(30,74,111,0.1)',
+                        tension: 0.2,
+                        fill: true
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            const deptRes = await fetch('/api/analytics/department-comparison');
+            const dept = await deptRes.json();
+            new Chart(document.getElementById('deptChart'), {
+                type: 'bar',
+                data: {
+                    labels: dept.departments || [],
+                    datasets: [{
+                        label: 'Attendance %',
+                        data: dept.attendance || [],
+                        backgroundColor: '#1e4a6f',
+                        borderRadius: 6
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            const topRes = await fetch('/api/analytics/top-performers');
+            const top = await topRes.json();
+            const topTbody = document.querySelector('#topTable tbody');
+            topTbody.innerHTML = '';
+            if (top.length) {
+                top.forEach((emp, index) => {
+                    topTbody.innerHTML += `
+                        <tr>
+                            <td><span class="rank-badge">${index+1}</span></td>
+                            <td>${emp.name}</td>
+                            <td>${emp.department}</td>
+                            <td>${emp.attendance}%</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                topTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No data</td></tr>';
+            }
+
+            const lowRes = await fetch('/api/analytics/low-attendance');
+            const low = await lowRes.json();
+            const lowTbody = document.querySelector('#lowTable tbody');
+            lowTbody.innerHTML = '';
+            if (low.length) {
+                low.forEach(emp => {
+                    lowTbody.innerHTML += `
+                        <tr>
+                            <td>${emp.name}</td>
+                            <td>${emp.department}</td>
+                            <td>${emp.attendance}%</td>
+                            <td><span class="badge-warning">${emp.warning}</span></td>
+                        </tr>
+                    `;
+                });
+            } else {
+                lowTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No alerts</td></tr>';
+            }
+        } catch (err) {
+            console.error('Failed to load analytics data', err);
+        }
+    }
+
+    loadAnalytics();
+</script>
+</body>
+</html>

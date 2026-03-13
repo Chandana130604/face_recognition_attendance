@@ -1,0 +1,15 @@
+venv/
+venv310/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.dll
+*.onnx
+*.dat
+*.pt
+*.h5
+*.model
+*.npy
+site-packages/

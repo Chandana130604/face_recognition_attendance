@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Login · FaceTrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card {
+            background: white;
+            width: 500px;
+            max-width: 90%;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+        .video-container {
+            width: 100%;
+            background: #2d3e50;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            border: 2px dashed #a0b8cc;
+            position: relative;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        video {
+            width: 100%;
+            display: block;
+        }
+        .placeholder {
+            color: white;
+            font-size: 1rem;
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        .btn {
+            background: #1e4a6f;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+        }
+        .btn-outline {
+            background: white;
+            color: #1e4a6f;
+            border: 2px solid #1e4a6f;
+        }
+        .btn-outline:hover {
+            background: #eef6ff;
+        }
+        .status {
+            margin: 1rem 0;
+            font-size: 1rem;
+            color: #555;
+        }
+        .links {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        .links a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2><i class="fas fa-camera-retro"></i> Face Login</h2>
+        <div class="video-container">
+            <video id="video" autoplay playsinline style="display: none;"></video>
+            <div class="placeholder" id="placeholder">
+                <i class="fas fa-camera" style="font-size:48px; opacity:0.6;"></i>
+                <p>Camera is off</p>
+            </div>
+        </div>
+        <div class="btn-group">
+            <button class="btn" id="startCameraBtn"><i class="fas fa-play"></i> Start Camera</button>
+            <button class="btn btn-outline" id="scanBtn"><i class="fas fa-camera"></i> Scan Face</button>
+        </div>
+        <div class="status" id="statusMsg"></div>
+        <div class="links">
+            <a href="/"><i class="fas fa-arrow-left"></i> Back to Home</a>
+            <a href="/user-register"><i class="fas fa-user-plus"></i> New user? Register</a>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const placeholder = document.getElementById('placeholder');
+        const startBtn = document.getElementById('startCameraBtn');
+        const scanBtn = document.getElementById('scanBtn');
+        const statusMsg = document.getElementById('statusMsg');
+
+        let stream = null;
+
+        startBtn.addEventListener('click', async () => {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                video.style.display = 'block';
+                placeholder.style.display = 'none';
+                statusMsg.innerText = 'Camera ready. Click Scan Face.';
+            } catch (err) {
+                statusMsg.innerText = 'Camera access denied: ' + err.message;
+            }
+        });
+
+        scanBtn.addEventListener('click', () => {
+            if (!stream) {
+                statusMsg.innerText = 'Please start the camera first.';
+                return;
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            const imageData = canvas.toDataURL('image/jpeg');
+
+            statusMsg.innerText = 'Scanning...';
+
+            fetch('/api/recognize', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: imageData })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Store employee info in sessionStorage
+                    sessionStorage.setItem('userEmpId', data.emp_id);
+                    sessionStorage.setItem('userName', data.name);
+                    // Redirect to user attendance page
+                    window.location.href = '/user-attendance';
+                } else {
+                    statusMsg.innerText = data.message || 'Face not recognized';
+                }
+            })
+            .catch(err => {
+                statusMsg.innerText = 'Error: ' + err.message;
+            });
+        });
+    </script>
+</body>
+</html>

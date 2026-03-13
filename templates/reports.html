@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports · FaceTrack HR</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        body {
+            background-color: #f5f7fb;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .app {
+            display: flex;
+            height: 100%;
+        }
+        /* ---------- SIDEBAR (same as dashboard) ---------- */
+        .sidebar {
+            width: 260px;
+            background: white;
+            border-right: 1px solid #e9eef2;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.02);
+        }
+        .sidebar-header {
+            padding: 24px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #f0f3f7;
+        }
+        .sidebar-header .logo {
+            background: #1e4a6f;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+        .sidebar-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a2639;
+        }
+        .nav {
+            flex: 1;
+            padding: 24px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            color: #4a5a6e;
+            font-weight: 500;
+            font-size: 15px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .nav-item i {
+            width: 22px;
+            font-size: 1.2rem;
+            color: #6b7a8f;
+        }
+        .nav-item.active {
+            background: #eef6ff;
+            color: #1e4a6f;
+        }
+        .nav-item.active i {
+            color: #1e4a6f;
+        }
+        .nav-item:hover:not(.active) {
+            background: #f8fafd;
+        }
+        /* ---------- MAIN CONTENT ---------- */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: #f5f7fb;
+        }
+        .top-header {
+            background: white;
+            padding: 16px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e9eef2;
+        }
+        .header-left h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1a2639;
+        }
+        .header-left .datetime {
+            font-size: 0.9rem;
+            color: #6b7a8f;
+            margin-top: 4px;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .notification-icon {
+            font-size: 1.3rem;
+            color: #4a5a6e;
+            cursor: pointer;
+        }
+        .admin-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: #1e4a6f;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        .logout-btn {
+            background: none;
+            border: 1px solid #dde3e9;
+            padding: 8px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .logout-btn:hover {
+            background: #f0f4f8;
+        }
+        /* ---------- REPORTS PAGE CONTENT ---------- */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+        }
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #1a2639;
+        }
+        .report-type-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        .report-tab {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 30px;
+            padding: 10px 20px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .report-tab.active {
+            background: #1e4a6f;
+            color: white;
+            border-color: #1e4a6f;
+        }
+        .filter-panel {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            border: 1px solid #edf2f7;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f8fafd;
+            padding: 4px 12px;
+            border-radius: 30px;
+            border: 1px solid #e2e8f0;
+        }
+        .filter-group i {
+            color: #8a9aa8;
+            font-size: 0.9rem;
+        }
+        .filter-group input,
+        .filter-group select {
+            border: none;
+            background: transparent;
+            padding: 8px 0;
+            font-size: 14px;
+            outline: none;
+            color: #1a2639;
+        }
+        .filter-group select {
+            cursor: pointer;
+            min-width: 150px;
+        }
+        .btn {
+            background: #1e4a6f;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+        .btn-outline {
+            background: white;
+            color: #1e4a6f;
+            border: 1px solid #1e4a6f;
+        }
+        .btn-outline:hover {
+            background: #eef6ff;
+        }
+        .export-buttons {
+            display: flex;
+            gap: 6px;
+            margin-left: auto;
+        }
+        .table-container {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #edf2f7;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            text-align: left;
+            padding: 14px 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #4a5a6e;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            background: white;
+        }
+        td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #f0f4f8;
+            color: #1a2639;
+            font-size: 14px;
+        }
+        tbody tr:hover {
+            background: #f8fafd;
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        .status-present {
+            background: #e1f7e3;
+            color: #1e7e34;
+        }
+        .status-absent {
+            background: #f1d7d7;
+            color: #b33;
+        }
+        .status-late {
+            background: #fff3cd;
+            color: #8a6100;
+        }
+        @media (max-width: 768px) {
+            .filter-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .export-buttons {
+                margin-left: 0;
+                justify-content: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo"><i class="fas fa-camera-retro"></i></div>
+            <h2>FaceTrack HR</h2>
+        </div>
+        <div class="nav">
+            <div class="nav-item" data-page="dashboard"><i class="fas fa-chart-pie"></i> <span>Dashboard</span></div>
+            <div class="nav-item" data-page="camera"><i class="fas fa-video"></i> <span>Camera Monitor</span></div>
+            <div class="nav-item" data-page="employees"><i class="fas fa-users"></i> <span>Employees</span></div>
+            <div class="nav-item" data-page="logs"><i class="fas fa-clock"></i> <span>Attendance Logs</span></div>
+            <div class="nav-item" data-page="analytics"><i class="fas fa-chart-line"></i> <span>Analytics</span></div>
+            <div class="nav-item active" data-page="reports"><i class="fas fa-file-alt"></i> <span>Reports</span></div>
+            <div class="nav-item" data-page="settings"><i class="fas fa-cog"></i> <span>Settings</span></div>
+            <div class="nav-item" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></div>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="top-header">
+            <div class="header-left">
+                <h1>Generate Reports</h1>
+                <div class="datetime" id="currentDateTime"></div>
+            </div>
+            <div class="header-right">
+                <div class="notification-icon"><i class="far fa-bell"></i></div>
+                <div class="admin-profile">
+                    <div class="avatar">AD</div>
+                    <span>Admin</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <button class="logout-btn" id="headerLogoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <h2>Generate Reports</h2>
+
+            <!-- Report Type Tabs -->
+            <div class="report-type-tabs">
+                <div class="report-tab active" data-type="daily">Daily Report</div>
+                <div class="report-tab" data-type="weekly">Weekly Report</div>
+                <div class="report-tab" data-type="monthly">Monthly Report</div>
+                <div class="report-tab" data-type="department">Department Report</div>
+            </div>
+
+            <!-- Filters Panel -->
+            <div class="filter-panel">
+                <div class="filter-group">
+                    <i class="fas fa-calendar-alt"></i>
+                    <input type="date" id="startDate" placeholder="Start Date">
+                </div>
+                <div class="filter-group">
+                    <i class="fas fa-calendar-alt"></i>
+                    <input type="date" id="endDate" placeholder="End Date">
+                </div>
+                <div class="filter-group">
+                    <i class="fas fa-building"></i>
+                    <select id="deptFilter">
+                        <option value="">All Departments</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <i class="fas fa-user"></i>
+                    <select id="empFilter">
+                        <option value="">All Employees</option>
+                    </select>
+                </div>
+                <button class="btn" id="previewBtn"><i class="fas fa-eye"></i> Preview</button>
+                <div class="export-buttons">
+                    <button class="btn-outline" id="exportCsv"><i class="fas fa-file-csv"></i> CSV</button>
+                    <button class="btn-outline" id="exportExcel"><i class="fas fa-file-excel"></i> Excel</button>
+                    <button class="btn-outline" id="exportPdf"><i class="fas fa-file-pdf"></i> PDF</button>
+                </div>
+            </div>
+
+            <!-- Preview Table -->
+            <div class="table-container">
+                <table id="reportTable">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>ID</th>
+                            <th>Department</th>
+                            <th>Date</th>
+                            <th>Login Time</th>
+                            <th>Logout Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr><td colspan="7" style="text-align:center;">Select filters and click Preview</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- Helper: update date/time ----------
+    function updateDateTime() {
+        const now = new Date();
+        document.getElementById('currentDateTime').innerText = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+    }
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+
+    // ---------- Logout ----------
+    function logout() {
+        window.location.href = '/';
+    }
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+    document.getElementById('headerLogoutBtn').addEventListener('click', logout);
+
+    // ---------- Sidebar navigation ----------
+    document.querySelectorAll('.nav-item[data-page]').forEach(item => {
+        item.addEventListener('click', function(e) {
+            const page = this.dataset.page;
+            const pageMap = {
+                'dashboard': '/admin-dashboard',
+                'camera': '/camera-monitor',
+                'employees': '/employees',
+                'logs': '/attendance-logs',
+                'analytics': '/attendance-analytics',
+                'reports': '/reports',
+                'settings': '/settings'
+            };
+            if (pageMap[page]) window.location.href = pageMap[page];
+        });
+    });
+
+    // ---------- Report Type Tabs ----------
+    const tabs = document.querySelectorAll('.report-tab');
+    let currentType = 'daily';
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            tabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            currentType = this.dataset.type;
+            // Optionally adjust date filters based on type
+        });
+    });
+
+    // ---------- Load Department and Employee Filters ----------
+    async function loadFilterOptions() {
+        try {
+            const deptRes = await fetch('/api/employees/department-stats');
+            const depts = await deptRes.json();
+            const deptSelect = document.getElementById('deptFilter');
+            deptSelect.innerHTML = '<option value="">All Departments</option>' + 
+                Object.keys(depts).map(d => `<option value="${d}">${d}</option>`).join('');
+
+            const empRes = await fetch('/api/employees/list');
+            const emps = await empRes.json();
+            const empSelect = document.getElementById('empFilter');
+            empSelect.innerHTML = '<option value="">All Employees</option>' + 
+                emps.map(e => `<option value="${e.employee_id}">${e.name}</option>`).join('');
+        } catch (err) {
+            console.error('Failed to load filter options', err);
+        }
+    }
+
+    // ---------- Preview Report ----------
+    async function previewReport() {
+        const start = document.getElementById('startDate').value;
+        const end = document.getElementById('endDate').value;
+        const dept = document.getElementById('deptFilter').value;
+        const emp = document.getElementById('empFilter').value;
+        const params = new URLSearchParams({
+            report_type: currentType,
+            start_date: start,
+            end_date: end,
+            department: dept,
+            employee: emp
+        });
+        try {
+            const res = await fetch(`/api/reports/preview?${params}`);
+            const data = await res.json();
+            renderTable(data);
+        } catch (err) {
+            console.error('Preview error', err);
+        }
+    }
+
+    function renderTable(data) {
+        const tbody = document.getElementById('tableBody');
+        if (!data.length) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No records found</td></tr>';
+            return;
+        }
+        tbody.innerHTML = '';
+        data.forEach(rec => {
+            const statusClass = 
+                rec.status === 'Present' ? 'status-present' :
+                rec.status === 'Absent' ? 'status-absent' :
+                rec.status === 'Late' ? 'status-late' : '';
+            tbody.innerHTML += `
+                <tr>
+                    <td>${rec.employee}</td>
+                    <td>${rec.id}</td>
+                    <td>${rec.department}</td>
+                    <td>${rec.date}</td>
+                    <td>${rec.login || '--'}</td>
+                    <td>${rec.logout || '--'}</td>
+                    <td><span class="status-badge ${statusClass}">${rec.status}</span></td>
+                </tr>
+            `;
+        });
+    }
+
+    // ---------- Export Functions ----------
+    function exportReport(format) {
+        const start = document.getElementById('startDate').value;
+        const end = document.getElementById('endDate').value;
+        const dept = document.getElementById('deptFilter').value;
+        const emp = document.getElementById('empFilter').value;
+        const params = new URLSearchParams({
+            report_type: currentType,
+            start_date: start,
+            end_date: end,
+            department: dept,
+            employee: emp
+        });
+        window.location.href = `/api/reports/export/${format}?${params}`;
+    }
+
+    // ---------- Event Listeners ----------
+    document.getElementById('previewBtn').addEventListener('click', previewReport);
+    document.getElementById('exportCsv').addEventListener('click', () => exportReport('csv'));
+    document.getElementById('exportExcel').addEventListener('click', () => exportReport('excel'));
+    document.getElementById('exportPdf').addEventListener('click', () => exportReport('pdf'));
+
+    // Set default date range (last 7 days)
+    const today = new Date();
+    const sevenDaysAgo = new Date(today);
+    sevenDaysAgo.setDate(today.getDate() - 7);
+    document.getElementById('startDate').value = sevenDaysAgo.toISOString().split('T')[0];
+    document.getElementById('endDate').value = today.toISOString().split('T')[0];
+
+    // Initial load
+    loadFilterOptions();
+</script>
+</body>
+</html>

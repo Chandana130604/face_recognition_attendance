@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration · FaceTrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            width: 500px;
+            max-width: 100%;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            outline: none;
+            font-size: 1rem;
+        }
+        .camera-preview {
+            background: #2d3e50;
+            border-radius: 16px;
+            height: 240px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+        .placeholder {
+            text-align: center;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin: 1rem 0;
+        }
+        .btn {
+            background: #1e4a6f;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+        .btn-outline {
+            background: white;
+            color: #1e4a6f;
+            border: 1px solid #1e4a6f;
+        }
+        .btn-outline:hover {
+            background: #eef6ff;
+        }
+        .message {
+            margin-top: 1rem;
+            text-align: center;
+            font-weight: 500;
+        }
+        .back {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+        .back a {
+            color: #888;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .error-message {
+            color: #b33;
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2><i class="fas fa-user-plus"></i> Employee Self‑Registration</h2>
+        <form id="registerForm">
+            <div class="form-group">
+                <label>Employee ID</label>
+                <input type="text" id="emp_id" required>
+            </div>
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="name" required>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label>Department</label>
+                <select id="department">
+                    <option>Engineering</option>
+                    <option>HR</option>
+                    <option>Marketing</option>
+                    <option>Finance</option>
+                    <option>Operations</option>
+                </select>
+            </div>
+            <div class="camera-preview">
+                <video id="video" autoplay playsinline></video>
+                <div class="placeholder" id="placeholder">
+                    <i class="fas fa-camera" style="font-size:48px; opacity:0.6;"></i>
+                    <p>Camera is off</p>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn" id="startCameraBtn"><i class="fas fa-play"></i> Start Camera</button>
+                <button type="button" class="btn btn-outline" id="captureBtn"><i class="fas fa-camera"></i> Capture & Register</button>
+            </div>
+            <div id="message" class="message"></div>
+            <div class="back">
+                <a href="/user-face-login"><i class="fas fa-arrow-left"></i> Already have an account? Login</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const placeholder = document.getElementById('placeholder');
+        const startBtn = document.getElementById('startCameraBtn');
+        const captureBtn = document.getElementById('captureBtn');
+        const messageDiv = document.getElementById('message');
+
+        let stream = null;
+
+        // Check if browser supports getUserMedia
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            messageDiv.innerHTML = '<div class="error-message">❌ Your browser does not support camera access. Please use a modern browser (Chrome, Edge, Firefox) and access this page via http://localhost:5000 (not file://).</div>';
+            startBtn.disabled = true;
+            captureBtn.disabled = true;
+        }
+
+        startBtn.addEventListener('click', async () => {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                video.style.display = 'block';
+                placeholder.style.display = 'none';
+                messageDiv.innerHTML = ''; // clear any previous errors
+            } catch (err) {
+                let errorMsg = 'Camera error: ' + err.message;
+                if (err.name === 'NotAllowedError') {
+                    errorMsg = 'Camera access denied. Please allow camera permissions.';
+                } else if (err.name === 'NotFoundError') {
+                    errorMsg = 'No camera found on this device.';
+                }
+                messageDiv.innerHTML = `<div class="error-message">❌ ${errorMsg}</div>`;
+            }
+        });
+
+        captureBtn.addEventListener('click', async () => {
+            const emp_id = document.getElementById('emp_id').value.trim();
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const department = document.getElementById('department').value;
+
+            if (!emp_id || !name || !email) {
+                messageDiv.innerHTML = '<div class="error-message">❌ Please fill all fields</div>';
+                return;
+            }
+
+            if (!stream) {
+                messageDiv.innerHTML = '<div class="error-message">❌ Please start the camera first</div>';
+                return;
+            }
+
+            // Capture frame from video
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            const imageData = canvas.toDataURL('image/jpeg');
+
+            messageDiv.innerHTML = '<span>Processing...</span>';
+
+            // Call registration API
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        emp_id, name, email, department,
+                        image: imageData
+                    })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    messageDiv.innerHTML = `<span style="color:#1e7e34;">✔ ${result.message}</span>`;
+                    // Optionally redirect to login after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = '/user-face-login';
+                    }, 2000);
+                } else {
+                    messageDiv.innerHTML = `<div class="error-message">✘ ${result.message}</div>`;
+                }
+            } catch (err) {
+                messageDiv.innerHTML = `<div class="error-message">✘ Error: ${err.message}</div>`;
+            }
+        });
+    </script>
+</body>
+</html>

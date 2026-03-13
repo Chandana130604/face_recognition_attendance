@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+            animation: fadeInUp 0.5s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .logo {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 1rem;
+        }
+        .login-header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #333;
+        }
+        #video {
+            width: 100%;
+            border-radius: 10px;
+            background: #000;
+            margin-bottom: 1rem;
+        }
+        .btn-capture {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-capture:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn-retry {
+            width: 100%;
+            padding: 12px;
+            background: #6c757d;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        .btn-retry:hover {
+            background: #5a6268;
+        }
+        #result {
+            margin-top: 1rem;
+            text-align: center;
+            font-weight: 500;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo" onerror="this.style.display='none'">
+            <h1>Employee Face Login</h1>
+        </div>
+
+        <video id="video" autoplay playsinline></video>
+
+        <button class="btn-capture" id="captureBtn">
+            <i class="fas fa-camera"></i> Capture & Login
+        </button>
+        <button class="btn-retry" id="retryBtn" style="display: none;">
+            <i class="fas fa-redo-alt"></i> Try Again
+        </button>
+
+        <div class="loader" id="loader"></div>
+        <div id="result"></div>
+
+        <div class="text-center mt-3">
+            <a href="{{ url_for('index') }}">← Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const captureBtn = document.getElementById('captureBtn');
+        const retryBtn = document.getElementById('retryBtn');
+        const loader = document.getElementById('loader');
+        const resultDiv = document.getElementById('result');
+        let stream = null;
+
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: { ideal: 640 },
+                        height: { ideal: 480 },
+                        facingMode: 'user'
+                    } 
+                });
+                video.srcObject = stream;
+                resultDiv.innerHTML = '';
+            } catch (err) {
+                resultDiv.innerHTML = `<span style="color:red;">Camera error: ${err.message}</span>`;
+            }
+        }
+        startCamera();
+
+        captureBtn.addEventListener('click', async () => {
+            if (!video.videoWidth) {
+                resultDiv.innerHTML = '<span style="color:red;">Camera not ready</span>';
+                return;
+            }
+
+            loader.style.display = 'block';
+            captureBtn.style.display = 'none';
+            retryBtn.style.display = 'none';
+            resultDiv.innerHTML = '';
+
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataURL = canvas.toDataURL('image/jpeg', 0.9);
+
+            try {
+                const response = await fetch('/api/recognize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: dataURL })
+                });
+                const data = await response.json();
+                console.log("Server response:", data);
+
+                loader.style.display = 'none';
+
+                if (data.status === 'success') {
+                    resultDiv.innerHTML = `<span style="color:green;">✅ Welcome ${data.name} (${data.employee_id}) – ${data.action === 'checkin' ? 'Checked In' : 'Checked Out'}</span>`;
+                    // Redirect to employee dashboard after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = '/employee-dashboard';
+                    }, 2000);
+                } else if (data.status === 'no_face') {
+                    resultDiv.innerHTML = '<span style="color:red;">❌ No face detected</span>';
+                    captureBtn.style.display = 'block';
+                    retryBtn.style.display = 'block';
+                } else if (data.status === 'unknown') {
+                    resultDiv.innerHTML = '<span style="color:red;">❌ Unknown face</span>';
+                    captureBtn.style.display = 'block';
+                    retryBtn.style.display = 'block';
+                } else if (data.error) {
+                    resultDiv.innerHTML = `<span style="color:red;">❌ ${data.error}</span>`;
+                    captureBtn.style.display = 'block';
+                    retryBtn.style.display = 'block';
+                } else {
+                    resultDiv.innerHTML = '<span style="color:red;">❌ Recognition failed</span>';
+                    captureBtn.style.display = 'block';
+                    retryBtn.style.display = 'block';
+                }
+            } catch (err) {
+                loader.style.display = 'none';
+                resultDiv.innerHTML = `<span style="color:red;">Network error: ${err.message}</span>`;
+                captureBtn.style.display = 'block';
+                retryBtn.style.display = 'block';
+                console.error(err);
+            }
+        });
+
+        retryBtn.addEventListener('click', () => {
+            resultDiv.innerHTML = '';
+            captureBtn.style.display = 'block';
+            retryBtn.style.display = 'none';
+        });
+
+        window.addEventListener('beforeunload', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        });
+    </script>
+</body>
+</html>

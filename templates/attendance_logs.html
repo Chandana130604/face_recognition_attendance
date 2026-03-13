@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Logs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Face Attendance</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/admin-dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/employees">Employees</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/attendance">Attendance</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2>Attendance Logs</h2>
+        <form method="GET" class="row g-3 mb-4">
+            <div class="col-auto">
+                <label for="date" class="col-form-label">Select Date:</label>
+            </div>
+            <div class="col-auto">
+                <input type="date" class="form-control" id="date" name="date" value="{{ selected_date }}">
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">View</button>
+            </div>
+            <div class="col-auto">
+                <a href="/export-csv?date={{ selected_date }}" class="btn btn-success">Export CSV</a>
+            </div>
+        </form>
+
+        <table class="table table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Employee ID</th>
+                    <th>Name</th>
+                    <th>Login Time</th>
+                    <th>Logout Time</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rec in records %}
+                <tr>
+                    <td>{{ rec.get('employee_id', '-') }}</td>
+                    <td>{{ rec.get('name', '-') }}</td>
+                    <td>
+                        {% set cin = rec.get('check_in_time') %}
+                        {% if cin %}
+                            {{ cin.strftime('%H:%M:%S') if cin is not string else cin }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% set cout = rec.get('check_out_time') %}
+                        {% if cout %}
+                            {{ cout.strftime('%H:%M:%S') if cout is not string else cout }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% set status = rec.get('status', 'Pending') %}
+                        {% if status == 'Present' %}
+                            <span class="badge bg-success">Present</span>
+                        {% elif status == 'Absent' %}
+                            <span class="badge bg-danger">Absent</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="text-center">No records found</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="/admin-dashboard" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</body>
+</html>

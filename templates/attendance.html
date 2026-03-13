@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-2xl font-bold mb-4">Live Attendance</h2>
+            
+            <div class="mb-4">
+                <video id="video" width="640" height="480" autoplay class="border rounded"></video>
+                <canvas id="canvas" width="640" height="480" style="display: none;"></canvas>
+            </div>
+            
+            <div class="flex gap-2">
+                <button id="startAttendance" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                    Start Recognition
+                </button>
+                <button id="stopAttendance" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700" disabled>
+                    Stop
+                </button>
+            </div>
+            
+            <div id="result" class="mt-4"></div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-2xl font-bold mb-4">Today's Attendance</h2>
+            <div id="attendanceList" class="space-y-2">
+                <!-- Attendance records will appear here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const socket = io();
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+    
+    let recognitionActive = false;
+    let frameInterval;
+    
+    document.getElementById('startAttendance').addEventListener('click', async () => {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        recognitionActive = true;
+        
+        document.getElementById('startAttendance').disabled = true;
+        document.getElementById('stopAttendance').disabled = false;
+        
+        // Send frames every 500ms
+        frameInterval = setInterval(() => {
+            if (recognitionActive) {
+                context.drawImage(video, 0, 0, 640, 480);
+                const frameData = canvas.toDataURL('image/jpeg');
+                
+                socket.emit('frame', {
+                    mode: 'attendance',
+                    frame: frameData
+                });
+            }
+        }, 500);
+    });
+    
+    document.getElementById('stopAttendance').addEventListener('click', () => {
+        recognitionActive = false;
+        clearInterval(frameInterval);
+        video.srcObject.getTracks().forEach(track => track.stop());
+        
+        document.getElementById('startAttendance').disabled = false;
+        document.getElementById('stopAttendance').disabled = true;
+    });
+    
+    socket.on('attendance_result', (result) => {
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = `<div class="p-3 bg-yellow-100 text-yellow-700 rounded">
+            Detected: ${result.emp_id} - ${result.message}
+        </div>`;
+        
+        // Refresh attendance list
+        fetchAttendance();
+    });
+    
+    async function fetchAttendance() {
+        const response = await fetch('/api/attendance/today');
+        const records = await response.json();
+        
+        const list = document.getElementById('attendanceList');
+        list.innerHTML = records.map(record => `
+            <div class="p-2 bg-gray-50 rounded">
+                <span class="font-bold">${record.emp_id}</span> - 
+                ${new Date(record.login_time).toLocaleTimeString()}
+            </div>
+        `).join('');
+    }
+    
+    // Initial fetch
+    fetchAttendance();
+</script>
+{% endblock %}

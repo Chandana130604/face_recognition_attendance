@@ -1,0 +1,8 @@
+# database.py
+from pymongo import MongoClient
+
+# Connect to local MongoDB (adjust URI if needed)
+client = MongoClient('mongodb://localhost:27017/')
+db = client['face_attendance']          # database name
+employees = db['employees']              # collection for employees
+attendance = db['attendance']            # collection for attendance

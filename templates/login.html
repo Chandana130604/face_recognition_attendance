@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Face Attendance</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-header">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+            <h1>Face Attendance System</h1>
+            <p>Sign in to your account</p>
+        </div>
+
+        <!-- Traditional Login Form -->
+        <form id="loginForm" method="POST" action="{{ url_for('auth.login') }}">
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" name="username" placeholder="Email or Employee ID" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" name="password" id="password" placeholder="Password" required>
+                <i class="fas fa-eye-slash toggle-password" onclick="togglePassword()"></i>
+            </div>
+            <div class="options">
+                <label><input type="checkbox" name="remember"> Remember me</label>
+                <a href="#" class="forgot">Forgot password?</a>
+            </div>
+            {% if error %}
+                <div class="error-message">{{ error }}</div>
+            {% endif %}
+            <button type="submit" class="btn-login" id="loginBtn">
+                <span>Sign In</span>
+                <i class="fas fa-spinner fa-spin" style="display: none;"></i>
+            </button>
+        </form>
+
+        <div class="divider">
+            <span>or</span>
+        </div>
+
+        <!-- Face Login Option -->
+        <button class="btn-face-login" id="faceLoginBtn">
+            <i class="fas fa-camera"></i> Login with Face
+        </button>
+
+        <!-- Hidden Modal for Camera Capture -->
+        <div id="faceModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Face Recognition Login</h2>
+                <video id="video" autoplay playsinline></video>
+                <button class="btn-capture" id="captureBtn">Capture & Login</button>
+                <div id="faceStatus"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+</body>
+</html>

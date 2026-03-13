@@ -1,0 +1,44 @@
+<!-- Inside admin_dashboard.html, after the stats cards -->
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <a href="/employees" class="btn btn-outline-primary">View All Employees</a>
+                <a href="/register" class="btn btn-outline-success">Add Employee</a>
+                <a href="/attendance" class="btn btn-outline-info">Attendance Logs</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Monthly Attendance Trend</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="monthlyChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    fetch('/api/attendance/monthly')
+    .then(res => res.json())
+    .then(data => {
+        new Chart(document.getElementById('monthlyChart'), {
+            type: 'bar',
+            data: {
+                labels: data.months,
+                datasets: [{
+                    label: 'Total Present Days',
+                    data: data.present,
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)'
+                }]
+            }
+        });
+    });
+</script>

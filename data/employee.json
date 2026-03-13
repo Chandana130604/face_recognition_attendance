@@ -1,0 +1,57 @@
+[
+  {
+    "employee_id": "EMP001",
+    "name": "Rahul Sharma",
+    "department": "IT",
+    "email": "rahul.sharma@company.com",
+    "phone": "+91 98765 43210",
+    "photo": "https://randomuser.me/api/portraits/men/1.jpg",
+    "face_encoding": [0.124, -0.356, 0.789, -0.234, 0.567, -0.123, 0.456, -0.789, 0.321, -0.654, 0.987, -0.123, 0.456, -0.789, 0.321, -0.654],
+    "date_joined": "2024-01-15",
+    "is_active": true
+  },
+  {
+    "employee_id": "EMP002",
+    "name": "Priya Singh",
+    "department": "HR",
+    "email": "priya.singh@company.com",
+    "phone": "+91 98765 43211",
+    "photo": "https://randomuser.me/api/portraits/women/2.jpg",
+    "face_encoding": [0.234, -0.456, 0.654, -0.345, 0.678, -0.234, 0.567, -0.890, 0.432, -0.765, 0.876, -0.234, 0.567, -0.890, 0.432, -0.765],
+    "date_joined": "2024-02-01",
+    "is_active": true
+  },
+  {
+    "employee_id": "EMP003",
+    "name": "John Doe",
+    "department": "Finance",
+    "email": "john.doe@company.com",
+    "phone": "+91 98765 43212",
+    "photo": "https://randomuser.me/api/portraits/men/3.jpg",
+    "face_encoding": [0.345, -0.567, 0.543, -0.456, 0.789, -0.345, 0.678, -0.901, 0.543, -0.876, 0.765, -0.345, 0.678, -0.901, 0.543, -0.876],
+    "date_joined": "2024-01-20",
+    "is_active": true
+  },
+  {
+    "employee_id": "EMP004",
+    "name": "Aman Verma",
+    "department": "Operations",
+    "email": "aman.verma@company.com",
+    "phone": "+91 98765 43213",
+    "photo": "https://randomuser.me/api/portraits/men/4.jpg",
+    "face_encoding": [0.456, -0.678, 0.432, -0.567, 0.890, -0.456, 0.789, -0.012, 0.654, -0.987, 0.654, -0.456, 0.789, -0.012, 0.654, -0.987],
+    "date_joined": "2024-03-10",
+    "is_active": true
+  },
+  {
+    "employee_id": "EMP005",
+    "name": "Sneha Reddy",
+    "department": "Marketing",
+    "email": "sneha.reddy@company.com",
+    "phone": "+91 98765 43214",
+    "photo": "https://randomuser.me/api/portraits/women/5.jpg",
+    "face_encoding": [0.567, -0.789, 0.321, -0.678, 0.901, -0.567, 0.890, -0.123, 0.765, -0.098, 0.543, -0.567, 0.890, -0.123, 0.765, -0.098],
+    "date_joined": "2024-04-05",
+    "is_active": true
+  }
+]

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics · FaceTrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>/* same base styles */</style>
+</head>
+<body>
+<div class="app">
+    <div class="sidebar"><!-- copy --></div>
+    <div class="main">
+        <div class="top-header"><!-- copy --></div>
+        <div class="content">
+            <h2>Attendance Analytics</h2>
+            <div class="stats-grid" style="grid-template-columns: repeat(3,1fr);">
+                <div class="stat-card"><h3>Highest Attendance</h3><div id="highestName">-</div><div id="highestPercent">-</div></div>
+                <div class="stat-card"><h3>Lowest Attendance</h3><div id="lowestName">-</div><div id="lowestPercent">-</div></div>
+                <div class="stat-card"><h3>Average Attendance</h3><div id="avgPercent">-</div></div>
+            </div>
+            <div class="charts-row">
+                <div class="chart-card"><h3>Monthly Trend</h3><canvas id="monthlyChart"></canvas></div>
+                <div class="chart-card"><h3>Department Comparison</h3><canvas id="deptChart"></canvas></div>
+            </div>
+            <div class="performance-grid">
+                <div class="perf-card"><h4>Top Performers</h4><ul id="topList"></ul></div>
+                <div class="perf-card"><h4>Low Attendance Alerts</h4><ul id="lowList"></ul></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    async function loadAnalytics() {
+        // highest & lowest
+        const high = await fetch('/api/analytics/highest-attendance').then(r => r.json());
+        const low = await fetch('/api/analytics/lowest-attendance').then(r => r.json());
+        document.getElementById('highestName').innerText = high.name;
+        document.getElementById('highestPercent').innerText = high.attendance_percentage + '%';
+        document.getElementById('lowestName').innerText = low.name;
+        document.getElementById('lowestPercent').innerText = low.attendance_percentage + '%';
+
+        // average (from summary)
+        const summary = await fetch('/api/dashboard/summary').then(r => r.json());
+        document.getElementById('avgPercent').innerText = summary.attendance_percentage + '%';
+
+        // monthly chart
+        const monthly = await fetch('/api/analytics/attendance-chart?type=monthly').then(r => r.json());
+        new Chart(document.getElementById('monthlyChart'), {
+            type: 'line',
+            data: {
+                labels: monthly.labels,
+                datasets: [{
+                    label: 'Attendance',
+                    data: monthly.datasets[0].data,
+                    borderColor: '#1e4a6f'
+                }]
+            }
+        });
+
+        // department comparison
+        const dept = await fetch('/api/analytics/department-comparison').then(r => r.json());
+        new Chart(document.getElementById('deptChart'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(dept),
+                datasets: [{
+                    label: 'Attendance %',
+                    data: Object.values(dept),
+                    backgroundColor: '#1e4a6f'
+                }]
+            }
+        });
+
+        // top performers list
+        const empList = await fetch('/api/analytics/employee-attendance-list').then(r => r.json());
+        const top5 = empList.slice(0,5);
+        const low5 = empList.filter(e => e.attendance_percentage < 70).slice(0,5);
+        document.getElementById('topList').innerHTML = top5.map(e => `<li>${e.name} – ${e.attendance_percentage}%</li>`).join('');
+        document.getElementById('lowList').innerHTML = low5.map(e => `<li>${e.name} – ${e.attendance_percentage}%</li>`).join('');
+    }
+    loadAnalytics();
+</script>
+</body>
+</html>

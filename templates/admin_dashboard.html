@@ -1,0 +1,379 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo" onerror="this.style.display='none'">
+            <h3>Face<span>Attend</span></h3>
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ url_for('admin_dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('employee_list') }}">
+                    <i class="fas fa-users"></i>
+                    <span>Employees</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('attendance_logs') }}">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Attendance</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('register') }}">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Add Employee</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('logout') }}">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span>{{ session.get('username', 'Admin') }}</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <!-- Top Navbar -->
+        <nav class="navbar navbar-expand navbar-light bg-white shadow-sm">
+            <div class="container-fluid">
+                <button class="btn btn-outline-secondary" id="toggleSidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="navbar-nav ms-auto">
+                    <div class="dropdown">
+                        <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge bg-danger">3</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#">New employee registered</a></li>
+                            <li><a class="dropdown-item" href="#">5 attendance updates</a></li>
+                            <li><a class="dropdown-item" href="#">System update available</a></li>
+                        </ul>
+                    </div>
+                    <div class="dropdown ms-3">
+                        <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li class="dropdown-header">
+                                <strong>{{ session.get('username', 'Admin') }}</strong><br>
+                                <small class="text-muted">Administrator</small>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('profile') }}"><i class="fas fa-user"></i> Profile</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('settings') }}"><i class="fas fa-cog"></i> Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Page Content -->
+        <div class="container-fluid py-4">
+            <!-- Welcome Row -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2 class="fw-bold">Welcome back, {{ session.get('username', 'Admin') }}!</h2>
+                    <p class="text-muted">{{ current_time }}</p>
+                </div>
+            </div>
+
+            <!-- TODAY Section -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card bg-light border-0">
+                        <div class="card-body">
+                            <h4 class="mb-0"><i class="fas fa-calendar-day text-primary me-2"></i>TODAY – {{ today_date }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="card stat-card primary">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-subtitle">Total Employees</h6>
+                                    <h2 class="card-title mb-0">{{ stats.total_employees }}</h2>
+                                </div>
+                                <i class="fas fa-users fa-3x opacity-50"></i>
+                            </div>
+                            <div class="mt-3">
+                                <span class="badge bg-light text-dark">+12% from last month</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stat-card success">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-subtitle">Present Today</h6>
+                                    <h2 class="card-title mb-0">{{ stats.present_today }}</h2>
+                                </div>
+                                <i class="fas fa-user-check fa-3x opacity-50"></i>
+                            </div>
+                            <div class="mt-3">
+                                <span class="badge bg-light text-dark">{{ "%.1f"|format(attendance_percent) }}% attendance rate</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stat-card danger">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-subtitle">Absent Today</h6>
+                                    <h2 class="card-title mb-0">{{ stats.absent_today }}</h2>
+                                </div>
+                                <i class="fas fa-user-clock fa-3x opacity-50"></i>
+                            </div>
+                            <div class="mt-3">
+                                <span class="badge bg-light text-dark">Needs attention</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="row g-4 mb-4">
+                <!-- Line Chart (Last 7 Days) -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">Attendance Overview (Last 7 Days)</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="attendanceLineChart" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <!-- Pie Chart (Today) -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">Today's Attendance</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <canvas id="attendancePieChart" width="300" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions & Recent Attendance Row -->
+            <div class="row g-4 mb-4">
+                <div class="col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('register') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-user-plus"></i> Register New Employee
+                                </a>
+                                <a href="{{ url_for('attendance_logs') }}" class="btn btn-outline-success">
+                                    <i class="fas fa-calendar-alt"></i> View Attendance Logs
+                                </a>
+                                <a href="{{ url_for('employee_list') }}" class="btn btn-outline-info">
+                                    <i class="fas fa-list"></i> Manage Employees
+                                </a>
+                                <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#exportModal">
+                                    <i class="fas fa-download"></i> Export Reports
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div class="card h-100">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">Recent Attendance</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Employee</th>
+                                            <th>ID</th>
+                                            <th>Date</th>
+                                            <th>Check In</th>
+                                            <th>Check Out</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% if recent_attendance %}
+                                            {% for rec in recent_attendance %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar bg-primary text-white me-2">
+                                                            {{ rec.get('name', 'N/A')[0] if rec.get('name') else '?' }}
+                                                        </div>
+                                                        {{ rec.get('name', 'Unknown') }}
+                                                    </div>
+                                                </td>
+                                                <td>{{ rec.get('employee_id', '-') }}</td>
+                                                <td>{{ rec.get('date', '-') }}</td>
+                                                <td>
+                                                    {% set cin = rec.get('check_in_time') %}
+                                                    {{ cin.strftime('%H:%M') if cin and cin is not string else (cin if cin else '-') }}
+                                                </td>
+                                                <td>
+                                                    {% set cout = rec.get('check_out_time') %}
+                                                    {{ cout.strftime('%H:%M') if cout and cout is not string else (cout if cout else '-') }}
+                                                </td>
+                                                <td>
+                                                    {% set status = rec.get('status', 'Pending') %}
+                                                    {% if status == 'Present' %}
+                                                        <span class="badge bg-success">Present</span>
+                                                    {% elif status == 'Absent' %}
+                                                        <span class="badge bg-danger">Absent</span>
+                                                    {% else %}
+                                                        <span class="badge bg-warning">Pending</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="6" class="text-center py-4 text-muted">No recent attendance records.</td>
+                                            </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Export Reports</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label">Report Type</label>
+                        <select class="form-select">
+                            <option>Daily Attendance</option>
+                            <option>Monthly Summary</option>
+                            <option>Employee List</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Date Range</label>
+                        <input type="date" class="form-control" placeholder="Start Date">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Format</label>
+                        <select class="form-select">
+                            <option>CSV</option>
+                            <option>Excel</option>
+                            <option>PDF</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Export</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Toggle sidebar
+    document.getElementById('toggleSidebar').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('collapsed');
+        document.getElementById('mainContent').classList.toggle('expanded');
+    });
+
+    // Line chart (last 7 days)
+    const lineCtx = document.getElementById('attendanceLineChart').getContext('2d');
+    new Chart(lineCtx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels | tojson }},
+            datasets: [{
+                label: 'Present',
+                data: {{ chart_data | tojson }},
+                borderColor: '#4cc9f0',
+                backgroundColor: 'rgba(76, 201, 240, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, stepSize: 1 } }
+        }
+    });
+
+    // Pie chart (today's attendance)
+    fetch('/api/attendance/today-pie')
+        .then(response => response.json())
+        .then(data => {
+            const pieCtx = document.getElementById('attendancePieChart').getContext('2d');
+            new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Present', 'Absent'],
+                    datasets: [{
+                        data: [data.present, data.absent],
+                        backgroundColor: ['#28a745', '#dc3545'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        });
+</script>
+{% endblock %}
