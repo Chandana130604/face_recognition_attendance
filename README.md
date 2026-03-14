@@ -32,17 +32,17 @@ An AI-based attendance system that automatically marks attendance using **face r
 
 ## Project Structure
 
-face_recognition_attendance/
-│
-├── backend/          # Backend logic and routes
-├── frontend/         # UI templates and static files
-├── ai_model/         # AI training scripts
-├── face_module/      # Face capture & recognition
-├── data/             # Stored embeddings and attendance
-│
-├── app.py            # Main application
-├── requirements.txt
-└── README.md
+face_recognition_attendance/                                                                                                                            
+│                                                                                                                                                                
+├── backend/          # Backend logic and routes                                                                                                                  
+├── frontend/         # UI templates and static files                                                                                                             
+├── ai_model/         # AI training scripts                                                                                                                       
+├── face_module/      # Face capture & recognition                                                                                                                
+├── data/             # Stored embeddings and attendance                                                                                                          
+│                                                                                                                                                                
+├── app.py            # Main application                                                                                                                          
+├── requirements.txt                                                                                                                                              
+└── README.md                                                                                                                                                   
 
 
 ## Installation
